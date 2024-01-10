@@ -105,12 +105,22 @@ func SearchDuplicate(folder *Folder) {
 		}
 		queue = queue[1:]
 	}
+	file, err := os.Create("output.txt")
+	if err != nil {
+		fmt.Println("Ошибка создания файла:", err)
+		return
+	}
+	defer file.Close()
+
 	for _, duplFolder := range duplFolders {
-		fmt.Printf("\ncontent - %s", strings.Join(duplFolder.content, ","))
+		content := fmt.Sprintf("\ncontent - %s", strings.Join(duplFolder.content, ","))
+		file.WriteString(content)
+
 		for _, path := range duplFolder.paths {
-			fmt.Printf("\n path - %s\n", path)
+			pathString := fmt.Sprintf("\n path - %s", path)
+			file.WriteString(pathString)
 		}
-		fmt.Println("----------------------------------------")
+		file.WriteString("\n")
 	}
 }
 
