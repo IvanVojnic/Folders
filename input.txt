@@ -5,7 +5,8 @@ a/c
 a/b/1.txt
 a/b/d
 a/c/1.txt
-a/c/2.txt
+a/c/3.txt
+a/c/4.txt
 a/b/d/3.txt
 a/b/d/4.txt
 a/b/d/1.txt

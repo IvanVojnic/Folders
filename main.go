@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sort"
 	"strings"
 )
 
@@ -13,6 +14,7 @@ type Folder struct {
 	folders []*Folder
 	files   []string
 	visited bool
+	path    string
 }
 
 type ArrayFolder struct {
@@ -20,14 +22,21 @@ type ArrayFolder struct {
 	paths   []string
 }
 
-func NewArrayFolder(content []string, paths []string) *ArrayFolder {
+func NewArrayFolder(files []string, folders []*Folder, path string) *ArrayFolder {
+	content := make([]string, 0)
+	for _, file := range files {
+		content = append(content, file)
+	}
+	for _, currentFolder := range folders {
+		content = append(content, currentFolder.name)
+	}
+	var paths []string
+	paths = append(paths, path)
 	return &ArrayFolder{content: content, paths: paths}
 }
 
-var DuplicateFolders []ArrayFolder
-
-func NewFolder(name string, files []string, folders []*Folder) *Folder {
-	return &Folder{name: name, files: files, folders: folders}
+func NewFolder(name string, files []string, folders []*Folder, path string) *Folder {
+	return &Folder{name: name, files: files, folders: folders, path: path}
 }
 
 func (f *Folder) InsertFolder(path []string) {
@@ -41,50 +50,109 @@ func (f *Folder) InsertFolder(path []string) {
 					}
 				}
 			} else {
-				folder := NewFolder(val, nil, nil)
+				folder := NewFolder(val, nil, nil, fmt.Sprintf("%s%s/", f.path, val))
 				f.folders = append(f.folders, folder)
-				//sort.Sort(ByName(f.folders))
 				folder.InsertFolder(path[1:])
 				return
 			}
 		} else {
 			if strings.Contains(val, ".txt") {
 				f.files = append(f.files, val)
-				//sort.Strings(f.files)
 			} else {
-				folder := NewFolder(val, nil, nil)
-				f.folders = append(f.folders, folder)
-				//sort.Sort(ByName(f.folders))
+				isExists := false
+				for _, childFolder := range f.folders {
+					if val == childFolder.name {
+						isExists = true
+					}
+				}
+				if !isExists {
+					folder := NewFolder(val, nil, nil, fmt.Sprintf("%s%s/", f.path, val))
+					f.folders = append(f.folders, folder)
+				}
 			}
 		}
 	}
 }
 
-func (f *Folder) SearchDuplicate(folder *Folder) {
-	queue := make([]*Folder, 10, 20)
+func SearchDuplicate(folder *Folder) {
+	queue := make([]*Folder, 0)
+	var duplFolders []ArrayFolder
 	queue = append(queue, folder)
 	folder.visited = true
-	content := make([]string, len(folder.files)+len(folder.folders))
-	for _, file := range folder.files {
-		content = append(content, file)
-	}
-	for _, currentFolder := range folder.folders {
-		content = append(content, currentFolder.name)
-	}
-	var paths []string
-	paths = append(paths, fmt.Sprintf(folder.name, "/"))
-	DuplicateFolders = append(DuplicateFolders, *NewArrayFolder(content, paths))
+	duplFolders = append(duplFolders, *NewArrayFolder(folder.files, folder.folders, folder.path))
 	for len(queue) > 0 {
 		v := queue[0]
-		for _, folder := range v.folders {
-			//if()
+		if !v.visited {
+			foldersNames := make([]string, len(v.folders))
+			for _, currentFolder := range v.folders {
+				foldersNames = append(foldersNames, currentFolder.name)
+			}
+			isDupl := false
+			for i, arrayFolders := range duplFolders {
+				if arrayFolders.CompareArrays(v.files, foldersNames) {
+					duplFolders[i].paths = append(duplFolders[i].paths, v.path)
+					isDupl = true
+					break
+				}
+			}
+			if !isDupl {
+				duplFolders = append(duplFolders, *NewArrayFolder(v.files, v.folders, v.path))
+			}
+			v.visited = true
 		}
+		for _, currentFolder := range v.folders {
+			queue = append(queue, currentFolder)
+		}
+		queue = queue[1:]
+	}
+	for _, duplFolder := range duplFolders {
+		fmt.Printf("\ncontent - %s", strings.Join(duplFolder.content, ","))
+		for _, path := range duplFolder.paths {
+			fmt.Printf("\n path - %s\n", path)
+		}
+		fmt.Println("----------------------------------------")
 	}
 }
 
-func CompareArrays(files []string, folders []string, filesFolders []string) bool {
+func (a *ArrayFolder) CompareArrays(files []string, folders []string) bool {
+	for _, file := range files {
+		folders = append(folders, file)
+	}
+	sort.Strings(folders)
+	sort.Strings(a.content)
+
+	str1 := strings.Join(folders, "")
+	str2 := strings.Join(a.content, "")
+	commonLength := CommonLength(str1, str2)
+	var similarityPercent float64
+
+	if len(str1) > len(str2) {
+		similarityPercent = float64(commonLength) / float64(len(str1)) * 100
+	} else {
+		similarityPercent = float64(commonLength) / float64(len(str2)) * 100
+	}
+
+	if similarityPercent >= 90 {
+		return true
+	}
 
 	return false
+}
+
+func CommonLength(str1, str2 string) int {
+	charCount := make(map[rune]int)
+	for _, char := range str1 {
+		charCount[char]++
+	}
+
+	commonLen := 0
+	for _, char := range str2 {
+		if count, ok := charCount[char]; ok && count > 0 {
+			commonLen++
+			charCount[char]--
+		}
+	}
+	return commonLen
 }
 
 func main() {
@@ -95,27 +163,14 @@ func main() {
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-	root := NewFolder("a", nil, nil)
+	root := NewFolder("a", nil, nil, "a/")
 	for scanner.Scan() {
 		var path []string
 		path = strings.Split(scanner.Text(), "/")
-		fmt.Println(path)
 		root.InsertFolder(path[1:])
 	}
-
+	SearchDuplicate(root)
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
 }
-
-//Folders := make(map[string][]string)
-/*type ByName []*Folder
-
-func (n ByName) Len() int           { return len(n) }
-func (n ByName) Less(i, j int) bool { return n[i].name < n[j].name }
-func (n ByName) Swap(i, j int)      { n[i], n[j] = n[j], n[i] }
-
-func (f *Folder) GetFolder(key string) *Folder {
-	return nil
-}
-*/
