@@ -181,7 +181,7 @@ func main() {
 		root.InsertFolder(pathWithRoot[1:])
 	}
 	SearchDuplicate(root)
-	if err := scanner.Err(); err != nil {
+	if err = scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
 }
