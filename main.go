@@ -49,26 +49,26 @@ func (f *Folder) InsertFolder(path []string) {
 						return
 					}
 				}
-			} else {
+			}
+
+			folder := NewFolder(val, nil, nil, fmt.Sprintf("%s%s/", f.path, val))
+			f.folders = append(f.folders, folder)
+			folder.InsertFolder(path[1:])
+			return
+
+		}
+		if strings.Contains(val, ".txt") {
+			f.files = append(f.files, val)
+		} else {
+			isExists := false
+			for _, childFolder := range f.folders {
+				if val == childFolder.name {
+					isExists = true
+				}
+			}
+			if !isExists {
 				folder := NewFolder(val, nil, nil, fmt.Sprintf("%s%s/", f.path, val))
 				f.folders = append(f.folders, folder)
-				folder.InsertFolder(path[1:])
-				return
-			}
-		} else {
-			if strings.Contains(val, ".txt") {
-				f.files = append(f.files, val)
-			} else {
-				isExists := false
-				for _, childFolder := range f.folders {
-					if val == childFolder.name {
-						isExists = true
-					}
-				}
-				if !isExists {
-					folder := NewFolder(val, nil, nil, fmt.Sprintf("%s%s/", f.path, val))
-					f.folders = append(f.folders, folder)
-				}
 			}
 		}
 	}
@@ -173,11 +173,12 @@ func main() {
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-	root := NewFolder("a", nil, nil, "a/")
+	root := NewFolder("root", nil, nil, "root/")
 	for scanner.Scan() {
 		var path []string
 		path = strings.Split(scanner.Text(), "/")
-		root.InsertFolder(path[1:])
+		pathWithRoot := append([]string{"root"}, path...)
+		root.InsertFolder(pathWithRoot[1:])
 	}
 	SearchDuplicate(root)
 	if err := scanner.Err(); err != nil {
