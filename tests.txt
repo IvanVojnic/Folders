@@ -1,0 +1,185 @@
+1.input:
+
+a/1.txt
+a/2.txt
+a/b
+a/c
+a/b/1.txt
+a/b/d
+a/c/1.txt
+a/c/3.txt
+a/c/4.txt
+a/b/d/3.txt
+a/b/d/4.txt
+a/b/d/1.txt
+
+output:
+
+content - a
+ path - root/
+
+content - 1.txt,2.txt,b,c
+ path - root/a/
+
+content - 1.txt,d
+ path - root/a/b/
+
+content - 1.txt,3.txt,4.txt
+ path - root/a/c/
+ path - root/a/b/d/
+
+----------------------------------------------------------------------
+
+2.input:
+
+c/1.txt
+c/3.txt
+c/4.txt
+c/5.txt
+c/6.txt
+c/8.txt
+c/7.txt
+c/9.txt
+c/10.txt
+c/2.txt
+b/d/3.txt
+b/d/4.txt
+b/d/1.txt
+b/d/2.txt
+b/d/6.txt
+b/d/5.txt
+b/d/10.txt
+b/d/8.txt
+b/d/9.txt
+
+output:
+
+content - b,c
+ path - root/
+
+content - 1.txt,10.txt,2.txt,3.txt,4.txt,5.txt,6.txt,7.txt,8.txt,9.txt
+ path - root/c/
+ path - root/b/d/
+
+content - d
+ path - root/b/
+
+----------------------------------------------------------------------
+3.input:
+
+folder1/file1.txt
+folder1/folder2/file2.txt
+folder3/file3.txt
+folder4/file4.txt
+folder4/folder5/file5.txt
+folder6/file1.txt
+folder6/folder2/file2.txt
+
+output:
+content - folder1,folder3,folder4,folder6
+ path - root/
+
+content - file1.txt,folder2
+ path - root/folder1/
+ path - root/folder6/
+
+content - file3.txt
+ path - root/folder3/
+
+content - file4.txt,folder5
+ path - root/folder4/
+
+content - file2.txt
+ path - root/folder1/folder2/
+ path - root/folder6/folder2/
+
+content - file5.txt
+ path - root/folder4/folder5/
+
+---------------------------------------------------------------------
+
+4.input:
+
+folder1/file1.txt
+folder1/folder2/file2.txt
+folder3/file3.txt
+folder4/file4.txt
+folder4/folder5/file5.txt
+folder6/file1.txt
+folder6/folder2/file2.txt
+folder6/folder2/folder2/file2.txt
+folder6/folder2/folder2/file1.txt
+
+output:
+
+content - folder1,folder3,folder4,folder6
+ path - root/
+
+content - file1.txt,folder2
+ path - root/folder1/
+ path - root/folder6/
+
+content - file3.txt
+ path - root/folder3/
+
+content - file4.txt,folder5
+ path - root/folder4/
+
+content - file2.txt
+ path - root/folder1/folder2/
+
+content - file5.txt
+ path - root/folder4/folder5/
+
+content - file2.txt,folder2
+ path - root/folder6/folder2/
+
+content - file2.txt,file1.txt
+ path - root/folder6/folder2/folder2/
+
+----------------------------------------------------------------------
+
+5. input:
+folder1/file1.txt
+folder1/folder2/file2.txt
+folder3/file3.txt
+folder4/file4.txt
+folder4/folder5/file5.txt
+folder4/folder7/file1.txt
+folder4/folder7/folder2
+folder6/file1.txt
+folder6/folder2/file2.txt
+folder6/folder2/folder2/file2.txt
+folder6/folder2/folder2/file1.txt
+
+output:
+
+
+content - folder1,folder3,folder4,folder6
+ path - root/
+
+content - file1.txt,folder2
+ path - root/folder1/
+ path - root/folder6/
+ path - root/folder4/folder7/
+
+content - file3.txt
+ path - root/folder3/
+
+content - file4.txt,folder5,folder7
+ path - root/folder4/
+
+content - file2.txt
+ path - root/folder1/folder2/
+
+content - file5.txt
+ path - root/folder4/folder5/
+
+content - file2.txt,folder2
+ path - root/folder6/folder2/
+
+content -
+ path - root/folder4/folder7/folder2/
+
+content - file2.txt,file1.txt
+ path - root/folder6/folder2/folder2/

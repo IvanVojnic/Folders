@@ -83,7 +83,7 @@ func SearchDuplicate(folder *Folder) {
 	for len(queue) > 0 {
 		v := queue[0]
 		if !v.visited {
-			foldersNames := make([]string, len(v.folders))
+			foldersNames := make([]string, 0, len(v.folders))
 			for _, currentFolder := range v.folders {
 				foldersNames = append(foldersNames, currentFolder.name)
 			}
@@ -92,7 +92,6 @@ func SearchDuplicate(folder *Folder) {
 				if arrayFolders.CompareArrays(v.files, foldersNames) {
 					duplFolders[i].paths = append(duplFolders[i].paths, v.path)
 					isDupl = true
-					break
 				}
 			}
 			if !isDupl {
@@ -128,18 +127,29 @@ func (a *ArrayFolder) CompareArrays(files []string, folders []string) bool {
 	for _, file := range files {
 		folders = append(folders, file)
 	}
+
 	sort.Strings(folders)
 	sort.Strings(a.content)
+	matches := 0
 
-	str1 := strings.Join(folders, "")
-	str2 := strings.Join(a.content, "")
-	commonLength := CommonLength(str1, str2)
+	for _, contentValue := range a.content {
+		index := sort.Search(len(folders), func(i int) bool {
+			return folders[i] >= contentValue
+		})
+
+		if index < len(folders) && folders[index] == contentValue {
+			matches++
+		}
+	}
+
 	var similarityPercent float64
+	foldersLen := len(folders)
+	AContentLen := len(a.content)
 
-	if len(str1) > len(str2) {
-		similarityPercent = float64(commonLength) / float64(len(str1)) * 100
+	if foldersLen > AContentLen {
+		similarityPercent = float64(matches) / float64(foldersLen) * 100
 	} else {
-		similarityPercent = float64(commonLength) / float64(len(str2)) * 100
+		similarityPercent = float64(matches) / float64(AContentLen) * 100
 	}
 
 	if similarityPercent >= 90 {
@@ -147,22 +157,6 @@ func (a *ArrayFolder) CompareArrays(files []string, folders []string) bool {
 	}
 
 	return false
-}
-
-func CommonLength(str1, str2 string) int {
-	charCount := make(map[rune]int)
-	for _, char := range str1 {
-		charCount[char]++
-	}
-
-	commonLen := 0
-	for _, char := range str2 {
-		if count, ok := charCount[char]; ok && count > 0 {
-			commonLen++
-			charCount[char]--
-		}
-	}
-	return commonLen
 }
 
 func main() {
